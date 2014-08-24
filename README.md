@@ -74,7 +74,7 @@ router.post(path, handler);
 router.put(path, handler);
 router.patch (path, handler);
 router.delete(path, handler);
-
+router.del(path, handler);
 // where `handler` is the function that gets executed when a route pattern matches
 ```
 
