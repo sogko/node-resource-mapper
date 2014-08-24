@@ -4,6 +4,8 @@ var expect = require('chai').expect;
 var _ = require('lodash');
 var ResourceMapper = require('../../index');
 var MockRouter = require('../support/MockRouter');
+var MockAnotherRouter = require('../support/MockAnotherRouter');
+var MockRouterLimitedVerbs = require('../support/MockRouterLimitedVerbs');
 
 var router;
 var stubController = function () {
@@ -468,6 +470,51 @@ describe('Unit: ResourceMapper', function () {
         path: '/settings/profile',
         fn: stubController
       });
+      done();
+    });
+  });
+
+  describe('Router support', function () {
+    it('should support router that has del() interface instead of delete()', function (done) {
+      var router = new MockAnotherRouter();
+      expect(router.delete).to.not.exist;
+      expect(router.del).to.exist;
+
+      var map = new ResourceMapper(router);
+      var users = map.collection('users', {
+        show: stubController,
+        destroy: stubController
+      });
+
+      expect(router.routes.length).to.equal(2);
+      expect(router.routes[0]).to.eql({
+        verb: 'get',
+        path: '/users/:id',
+        fn: stubController
+      });
+      expect(router.routes[1]).to.eql({
+        verb: 'delete',
+        path: '/users/:id',
+        fn: stubController
+      });
+      done();
+    });
+
+    it('should throw an exception if router does not support a verb', function (done) {
+      var router = new MockRouterLimitedVerbs();
+
+      // MockRouterLimitedVerbs does not support PATCH verb
+      expect(router.patch).to.not.exist;
+
+      var map = new ResourceMapper(router);
+      var func = function () {
+        map.collection('users', {
+          show: stubController,
+          destroy: stubController,
+          update: stubController
+        });
+      };
+      expect(func).to.throw(Error);
       done();
     });
   });
