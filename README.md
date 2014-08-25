@@ -64,6 +64,63 @@ mapper.singleton('account', {
 });
 ```
 
+## API
+
+### var mapper = new ResourceMapper(router)
+Creates a new instance of ResourceMapper with given router object.
+See [Supported Routers](#supported-routers) to see a list of supported routers
+
+### Collection: mapper.collection(name, map)
+Creates a resource collection. 
+
+A perfect use-case for a resource collection would be a **Post** collection.
+
+Returns a new instance of ResourceMapper with its basePath pointed to this current collection, for e.g "/posts"
+
+```name``` is the given resource name, which will be used for the RESTful API route.
+```map``` is the list of resource actions to controllers.
+
+
+### Singleton: mapper.singleton(name, map)
+Creates a resource singleton. 
+
+A perfect use-case for a resource collection would be an **Account** resource. Only one Account singleton exists within the application context, in this example. 
+
+Returns a new instance of ResourceMapper with its basePath pointed to this current collection, for e.g "/account"
+
+```name``` is the given resource name, which will be used for the RESTful API route.
+```map``` is the list of resource actions to controllers.
+
+### Nested / sub-collections
+The library allows you to create a sub-collection.
+
+For e.g. to create a ```user``` collection with ```posts``` sub-collection to represent each user resource having a collection of ```posts```
+
+```javascript
+...
+var mapper = new ResourceMapper(router);
+
+var users = mapper.collection('users', {
+    list: function (req, res),      // GET  /users
+    create: function (req, res),    // POST /users
+    show: function (req, res),      // GET  /users/:id
+    edit: function (req, res),      // PUT  /users/:id 
+    update: function (req, res),    // PATCH  /users/:id
+    destroy: function (req, res),   // DELETE /users/:id
+});
+
+var posts = users.collection('posts', {
+    list: function (req, res),      // GET  /users/:id/posts
+    create: function (req, res),    // POST /users/:id/posts
+    show: function (req, res),      // GET  /users/:id/posts/:id
+    edit: function (req, res),      // PUT  /users/:id/posts/:id 
+    update: function (req, res),    // PATCH  /users/:id/posts/:id
+    destroy: function (req, res),   // DELETE /users/:id/posts/:id
+});
+```
+
+A ```sub-collection``` can be either a ```collection``` or a ```singleton```.
+
 ## Supported Routers
 
 Basically, this library supports any router that uses that following interface for routing:
@@ -90,9 +147,21 @@ A list of supported routers and example usage
 
 ## Concepts
 
-Resources: Collections vs Singleton
+### Resources: Collections vs Singleton vs Sub-collections
 
-Pragmatic RESTful APIs
+
+A ```resource``` is a fundamental concept in any RESTful api.
+
+A ```collection``` is well, simply a collection of resources. A good example of a collection would be a ```Posts``` collection of ```Post``` resource.
+
+A ```singleton``` is to model a resource that only exists once in itself within a given context.
+For example, in your web application context, you might want to model a ```account``` resource for your web app.
+
+A ```sub-collection``` is a simply a resource (either a collection or singleton resource) that exists within another resource. It usually used to express relationships between resources.
+
+
+A great read at: http://restful-api-design.readthedocs.org/en/latest/resources.html
+
 
 ## Tests
 
